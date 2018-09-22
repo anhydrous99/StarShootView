@@ -71,8 +71,9 @@ Fl_FITS_Image::Fl_FITS_Image(const char* filename): Fl_RGB_Image(0,0,0)
 
 void Fl_FITS_Image::copy_double_to_uchar(uchar* output, double* input, long long size)
 {
-  double max_ele = *std::max_element(input, input+size);
-  double min_ele = *std::min_element(input, input+size);
+  auto ele = std::minmax_element(input, input+size);
+  double max_ele = ele.first - input;
+  double min_ele = ele.second - input;
   for (long long i = 0; i < size; i++)
     output[i] = static_cast<uchar>( (input[i] - min_ele) * 255.0 / (max_ele - min_ele) );
 }
