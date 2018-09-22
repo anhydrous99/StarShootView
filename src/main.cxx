@@ -7,7 +7,7 @@
 
 int main() {
   fl_register_images();
-  Fl_FITS_Image fltk("leo.fit");
+  Fl_FITS_Image fltk("leo_triplet_8bit_rgb.fit");
   Fl_Window win(fltk.w() + 20, fltk.h() + 20);
   Fl_Box box(10, 10, fltk.w(), fltk.h());
   box.image(fltk);

@@ -60,7 +60,7 @@ Fl_FITS_Image::Fl_FITS_Image(const char* filename): Fl_RGB_Image(0,0,0)
 	  delete [] tmp;
 	}
 
-	if (d() == 3)
+	//if (d() == 3)
           planar_to_rgb(const_cast<uchar*>(array), pn);
       }
     }
