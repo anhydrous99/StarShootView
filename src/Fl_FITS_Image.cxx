@@ -60,7 +60,7 @@ Fl_FITS_Image::Fl_FITS_Image(const char* filename): Fl_RGB_Image(0,0,0)
 	  delete [] tmp;
 	}
 
-	//if (d() == 3)
+	if (d() == 3)
           planar_to_rgb(const_cast<uchar*>(array), pn);
       }
     }
@@ -78,18 +78,26 @@ void Fl_FITS_Image::copy_double_to_uchar(uchar* output, double* input, long long
 }
 void Fl_FITS_Image::planar_to_rgb(uchar* ar, long long size)
 {
-  long long j = 0;
-  for (long long i = 0; i < size; i = i + 3)
+  long long j;
+  long long trd = size / 3;
+
+  uchar f[trd];
+  uchar s[trd];
+  uchar t[trd];
+
+  /* split */
+  for (j = 0; j < trd; j++)
   {
-    swap(ar[i],   ar[j]);
-    swap(ar[i+1], ar[j+size/3]);
-    swap(ar[i+3], ar[j+2*size/3]);
-    j++;
+    f[j] = *(ar+j);
+    s[j] = *(ar+trd+j);
+    t[j] = *(ar+2*trd+j);
   }
-}
-void Fl_FITS_Image::swap(uchar& a, uchar& b)
-{
-  uchar c(a);
-  a = b;
-  b = c;
+
+  /* Perfect Shuffle */
+  for (j = 0; j < trd; j++)
+  {
+    *(ar+(j*3)) = f[j];
+    *(ar+(j*3)+1) = s[j];
+    *(ar+(j*3)+2) = t[j];
+  }
 }
