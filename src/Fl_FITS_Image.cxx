@@ -38,59 +38,59 @@ Fl_FITS_Image::Fl_FITS_Image(const char* filename): Fl_RGB_Image(0,0,0)
       {
         /* Set dimensions */
         w(naxes[0]);
-	h(naxes[1]);
-	d((naxis == 2) ? 1 : 3 );
+	      h(naxes[1]);
+	      d((naxis == 2) ? 1 : 3 );
 
-	/* Check if Size is too Big! */
-	if (((size_t)w()) * h() * d() > max_size() ) {
+	      /* Check if Size is too Big! */
+	      if (((size_t)w()) * h() * d() > max_size() ) {
           Fl::warning("JPEG file \"%s\" is too large or contains errors!\n", filename);
 
-	  /* close fits file if File too big */
-	  fits_close_file(fptr, &status);
+	        /* close fits file if File too big */
+	        fits_close_file(fptr, &status);
 
-	  /* set dimensions to 0 */
-	  w(0);
-	  h(0);
-	  d(0);
+	        /* set dimensions to 0 */
+	        w(0);
+	        h(0);
+	        d(0);
 
-	  /* delete array */
-	  if (array) {
-	    delete[] const_cast<uchar*>(array);
-	    array = 0;
-	    alloc_array = 0;
-	  }
+	        /* delete array */
+	        if (array) {
+	          delete[] const_cast<uchar*>(array);
+	          array = 0;
+	          alloc_array = 0;
+	        }
 
-	  /* throw error */
-	  ld(ERR_FORMAT);
-	  return;
-	}
+	        /* throw error */
+	        ld(ERR_FORMAT);
+	        return;
+	      }
 
-	/* allocate array */
-	long long pn = w() * h() * d();
-	array = new uchar[pn];
-	alloc_array = 1;
+	      /* allocate array */
+	      long long pn = w() * h() * d();
+	      array = new uchar[pn];
+	      alloc_array = 1;
 
-	/* Read Image */
-	if (bitpix == BYTE_IMG)
-	  fits_read_pix(fptr, TBYTE, fpixel, pn, NULL, const_cast<uchar*>(array), NULL, &status);
-	else
-	{
+	      /* Read Image */
+	      if (bitpix == BYTE_IMG)
+	        fits_read_pix(fptr, TBYTE, fpixel, pn, NULL, const_cast<uchar*>(array), NULL, &status);
+	      else
+	      {
           /* Create a double array, to compress any kind of image into 8bit space */
           double* tmp = new double[pn];
 
-	  /* Read image into double array */
-	  fits_read_pix(fptr, TDOUBLE, fpixel, pn, NULL, tmp, NULL, &status);
+	        /* Read image into double array */
+	        fits_read_pix(fptr, TDOUBLE, fpixel, pn, NULL, tmp, NULL, &status);
 
-	  /* Compress image into uchar array */
-	  copy_double_to_uchar(const_cast<uchar*>(array), tmp, pn);
+	        /* Compress image into uchar array */
+	        copy_double_to_uchar(const_cast<uchar*>(array), tmp, pn);
 
-	  /* delete temporary array */
-	  delete [] tmp;
-	}
+	        /* delete temporary array */
+	        delete [] tmp;
+	      }
 
-	/* FITS Images are store in a planar format but FLTK requires an interleaved format */
-	/* RRRRGGGGBBBB -> RGBRGBRGBRGB */
-	if (d() == 3)
+	      /* FITS Images are store in a planar format but FLTK requires an interleaved format */
+	      /* RRRRGGGGBBBB -> RGBRGBRGBRGB */
+	      if (d() == 3)
           planar_to_rgb(const_cast<uchar*>(array), pn);
       }
     }
