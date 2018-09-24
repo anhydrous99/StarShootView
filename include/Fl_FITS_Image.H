@@ -14,7 +14,6 @@ public:
 private:
   void copy_double_to_uchar(uchar* output, double* input, long long size);
   void planar_to_rgb(uchar* ar, long long size);
-  void swap(uchar& a, uchar& b);
 };
 
 #endif // Fl_FITS_Image_h
