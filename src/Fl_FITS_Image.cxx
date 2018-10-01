@@ -71,27 +71,18 @@ Fl_FITS_Image::Fl_FITS_Image(const char* filename): Fl_RGB_Image(0,0,0)
 	      alloc_array = 1;
 
 	      /* Read Image */
-	      if (bitpix == BYTE_IMG)
-	        fits_read_pix(fptr, TBYTE, fpixel, pn, NULL, const_cast<uchar*>(array), NULL, &status);
-	      else
-	      {
-          /* Create a double array, to compress any kind of image into 8bit space */
-          double* tmp = new double[pn];
+        _dat = (double*)malloc(pn * sizeof(double));
 
-	        /* Read image into double array */
-	        fits_read_pix(fptr, TDOUBLE, fpixel, pn, NULL, tmp, NULL, &status);
-
-	        /* Compress image into uchar array */
-	        copy_double_to_uchar(const_cast<uchar*>(array), tmp, pn);
-
-	        /* delete temporary array */
-	        delete [] tmp;
-	      }
+	      /* Read image into double array */
+	      fits_read_pix(fptr, TDOUBLE, fpixel, pn, NULL, _dat, NULL, &status);
 
 	      /* FITS Images are store in a planar format but FLTK requires an interleaved format */
 	      /* RRRRGGGGBBBB -> RGBRGBRGBRGB */
 	      if (d() == 3)
-          planar_to_rgb(const_cast<uchar*>(array), pn);
+          planar_to_rgb(_dat, pn);
+
+	      /* Compress image into uchar array */
+	      copy_double_to_uchar(const_cast<uchar*>(array), _dat, pn);
       }
     }
     /* Close Fits file */
@@ -110,36 +101,45 @@ Fl_FITS_Image::Fl_FITS_Image(const char* filename): Fl_RGB_Image(0,0,0)
 void Fl_FITS_Image::copy_double_to_uchar(uchar* output, double* input, long long size)
 {
   /* Find largest and smallest number in array */
-  auto ele = std::minmax_element(input, input+size);
-  double max_ele = ele.first - input;
-  double min_ele = ele.second - input;
+  double min_ele = 0;
+  double max_ele = 0;
+  for (int i = 0; i < size; i++)
+  {
+    if (min_ele > input[i]) min_ele = input[i];
+    if (max_ele < input[i]) max_ele = input[i];
+  }
 
   /* Scale Image to uchar based on the largest and smallest number in array */
   for (long long i = 0; i < size; i++)
     output[i] = static_cast<uchar>( (input[i] - min_ele) * 255.0 / (max_ele - min_ele) );
 }
-void Fl_FITS_Image::planar_to_rgb(uchar* ar, long long size)
+void Fl_FITS_Image::planar_to_rgb(double* ar, long long size)
 {
   long long j;
   long long trd = size / 3;
 
-  uchar f[trd];
-  uchar s[trd];
-  uchar t[trd];
+  // Allocate temporary arrays
+  double* f = (double*)malloc(trd * sizeof(double));
+  double* s = (double*)malloc(trd * sizeof(double));
+  double* t = (double*)malloc(trd * sizeof(double));
 
   /* split */
   for (j = 0; j < trd; j++)
   {
-    f[j] = *(ar+j);
-    s[j] = *(ar+trd+j);
-    t[j] = *(ar+2*trd+j);
+    f[j] = ar[j];
+    s[j] = ar[trd+j];
+    t[j] = ar[2*trd+j];
   }
 
   /* Perfect Shuffle */
   for (j = 0; j < trd; j++)
   {
-    *(ar+(j*3)) = f[j];
-    *(ar+(j*3)+1) = s[j];
-    *(ar+(j*3)+2) = t[j];
+    ar[j*3] = f[j];
+    ar[(j*3)+1] = s[j];
+    ar[(j*3)+2] = t[j];
   }
+
+  delete [] f;
+  delete [] s;
+  delete [] t;
 }

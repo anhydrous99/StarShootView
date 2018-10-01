@@ -1,9 +1,8 @@
 #include "Main_Window.H"
-#include <iostream>
+#include "Fl_Levels_Chooser.H"
 #include <FL/Fl.H>
 #include <FL/fl_ask.H>
 #include <FL/Fl_Native_File_Chooser.H>
-#include <Fl_FITS_Image.H>
 
 Main_Window::Main_Window() : Fl_Window(400, 200, "StarShootView")
 {
@@ -16,6 +15,8 @@ Main_Window::Main_Window() : Fl_Window(400, 200, "StarShootView")
   /* Create the quit/open button and attach the callback functions */
   menuBar->add("&File/&Open", "^o", OpenCallback, (void*)this);
   menuBar->add("&File/&Quit", "^q", QuitCallback);
+
+  menuBar->add("&Tools/&Levels", "^l", LevelsCallback, (void*)this);
 
   /* Create the Box which will contain our images */
   imgBox = new Fl_Box(_boundary, _boundary+30, 400-_boundary, 200-_boundary);
@@ -42,18 +43,34 @@ void Main_Window::OpenCallback(Fl_Widget* w, void* data)
 
 void Main_Window::QuitCallback(Fl_Widget* w, void* data)
 {
+  // If Quit menu option is called exit application
   exit(0);
 }
+
+void Main_Window::LevelsCallback(Fl_Widget* w, void* data)
+{
+  // void pointer to Main_Window pointer
+  Main_Window* mn = (Main_Window*)data;
+  // Gets Fl_FITS_Image pointer from main window
+  Fl_FITS_Image* ft = mn->GetImgPtr();
+  // Creates Level Chooser class
+  Fl_Levels_Chooser* lc = new Fl_Levels_Chooser(ft->GetData(), 
+                                                ft->w(), ft->h(), ft->d());
+  // Shows Level Chooser Window
+  lc->show();
+}
+
 void Main_Window::Load_Image(const char* filename, void* data)
 {
   /* Set void pointer as Main_Window pointer */
   Main_Window *win = (Main_Window*)data;
 
   /* Create FITS object and get FITS image */
-  Fl_FITS_Image fits(filename);
+  Fl_FITS_Image* imgptr = new Fl_FITS_Image(filename);
+  win->SetImgPtr(imgptr);
 
   /* Get screen size, image size, position, and window position */
-  int img_w = fits.w(), img_h = fits.h();           // Image Size
+  int img_w = imgptr->w(), img_h = imgptr->h();           // Image Size
   int src_w = Fl::w(), src_h = Fl::h();             // Screen Size
   int x_pos = win->x_root(), y_pos = win->y_root(); // Window Position
   int boundary = win->Get_Boundary();               // Boundary Size
@@ -62,7 +79,7 @@ void Main_Window::Load_Image(const char* filename, void* data)
   suggest_size(src_w, src_h, img_w, img_h, boundary);
 
   /* Resize image */
-  Fl_Image* new_fits = fits.copy(img_w, img_h);
+  Fl_Image* new_fits = imgptr->copy(img_w, img_h);
 
   /* Update image, box size, window size, menu bar size, and redraw */
   win->resize(x_pos, y_pos, img_w + boundary, img_h + boundary + 30);
