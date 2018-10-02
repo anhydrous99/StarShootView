@@ -39,6 +39,8 @@ private:
   static void LevelsCallback(Fl_Widget* w, void* data);
   /* Loads the image into Fl_Box */
   static void Load_Image(const char* filename, void* data);
+  /* Loads the image from Fl_FITS type */
+  inline void Load_Image(Fl_FITS_Image* img);
   /* Figures out perfered size for image to be resized */
   static void suggest_size(int src_w, int src_h, int& img_w, int& img_h, int boundary);
 };

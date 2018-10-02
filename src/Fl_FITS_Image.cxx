@@ -7,7 +7,6 @@
 #include <FL/Fl.H>
 #include <stdio.h>
 #include <stdlib.h>
-#include <setjmp.h>
 #include <algorithm>
 
 extern "C"
@@ -142,4 +141,29 @@ void Fl_FITS_Image::planar_to_rgb(double* ar, long long size)
   delete [] f;
   delete [] s;
   delete [] t;
+}
+void Fl_FITS_Image::Update_Levels(double hi, double lo)
+{
+  /* Cast constant array to regular array for modification */
+  uchar* output = const_cast<uchar*>(array);
+  /* Calculate size of arrays */
+  long long size = d() * w() * h();
+  /* Find largest and smallest number in array */
+  double min_ele = 0;
+  double max_ele = 0;
+  for (int i = 0; i < size; i++)
+  {
+    if (min_ele > _dat[i]) min_ele = _dat[i];
+    if (max_ele < _dat[i]) max_ele = _dat[i];
+  }
+  /* Scale according to the cutoffs */
+  for (int i = 0; i < size; i++)
+  {
+    if (_dat[i] < lo)
+      output[i] = 0;
+    else if (_dat[i] > hi)
+      output[i] = 255;
+    else
+      output[i] = static_cast<uchar>(255*((_dat[i]-lo)/(hi-lo)-(min_ele)/(max_ele-min_ele)));
+  }
 }

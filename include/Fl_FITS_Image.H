@@ -12,6 +12,7 @@ public:
   Fl_FITS_Image(const char* filename);
   ~Fl_FITS_Image() { }
   double* GetData() { return _dat; }
+  void Update_Levels(double hi, double lo);
 private:
   void copy_double_to_uchar(uchar* output, double* input, long long size);
   void planar_to_rgb(double* ar, long long size);

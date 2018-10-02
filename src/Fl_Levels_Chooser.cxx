@@ -5,7 +5,6 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 
 // Constructor
 Fl_Levels_Chooser::Fl_Levels_Chooser(double* image, int width, int height, int d)
@@ -115,6 +114,13 @@ void Fl_Levels_Chooser::show()
 {
   // Show the Chooser
   window->show();
+
+  // BLOCK WHILE CHOOSER SHOWN
+  while( window->shown() ) {
+    Fl::wait();
+  }
+
+  // Flush
   Fl::flush();
 }
 

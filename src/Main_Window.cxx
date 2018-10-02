@@ -50,14 +50,35 @@ void Main_Window::QuitCallback(Fl_Widget* w, void* data)
 void Main_Window::LevelsCallback(Fl_Widget* w, void* data)
 {
   // void pointer to Main_Window pointer
-  Main_Window* mn = (Main_Window*)data;
+  Main_Window* win = (Main_Window*)data;
   // Gets Fl_FITS_Image pointer from main window
-  Fl_FITS_Image* ft = mn->GetImgPtr();
+  Fl_FITS_Image* ft = win->GetImgPtr();
   // Creates Level Chooser class
   Fl_Levels_Chooser* lc = new Fl_Levels_Chooser(ft->GetData(), 
                                                 ft->w(), ft->h(), ft->d());
   // Shows Level Chooser Window
   lc->show();
+
+  // Check status
+  if(lc->Status()==1)
+  {
+    double lo = lc->GetLowLevel();
+    double hi = lc->GetHighLevel();
+    Fl_FITS_Image* imgptr = win->GetImgPtr();
+    imgptr->Update_Levels(hi, lo);
+
+    /* Calculate Current Image Size */
+    int boundary = win->Get_Boundary();
+    int img_w = win->w() - boundary;
+    int img_h = win->h() - (boundary + 30);
+
+    /* Resize FITS Image */
+    Fl_Image* new_fits = imgptr->copy(img_w, img_h);
+
+    // Update image
+    win->imgBox->image(new_fits);
+    win->redraw();
+  }
 }
 
 void Main_Window::Load_Image(const char* filename, void* data)
