@@ -1,5 +1,5 @@
 # StarShootView
-A FITS Image View specifically designed to view RGB Images which are difficult to see with non-proprietary softward.
+A FITS Image View specifically designed to view RGB Images which are difficult to see with non-proprietary software.
 
 ## Ubuntu
 ```
